@@ -16,8 +16,8 @@
 
   /* SHA-256 of the room password. To change it, run:
      node -e "crypto.subtle.digest('SHA-256',new TextEncoder().encode('YOURPASS')).then(b=>console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')))"
-     Current password: water-is-super */
-  var PASS_HASH = "51f2e36a0890f037482f188295738d30f9bd6e9fae19e4bf8b22bd2f25a343ee";
+     Current password: suns-out-guns-0ut */
+  var PASS_HASH = "47d0605f9e7ac66440f280933e13b3dc94938dd30d4da4b9900102fdf0c27adf";
 
   var SECONDS = 25;
   var TARGET_MIN = 30;

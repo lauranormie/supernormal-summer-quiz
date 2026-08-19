@@ -21,7 +21,7 @@ a clock in the top bar counting up to the 30 minute mark so the host can pace it
 ## Password
 
 The quiz is behind a password so passers-by cannot wander in. It is currently
-**water-is-super**. Share it with the team alongside the link.
+**suns-out-guns-0ut** (note the zero in the last `0ut`). Share it with the team alongside the link.
 
 Only a SHA-256 hash of it lives in `app.js`, and the unlock is remembered per
 browser, so people type it once. To change it, run this and paste the result over
