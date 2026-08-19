@@ -86,7 +86,8 @@
     for (var k in a) if (a[k] && a[k].pts) t += a[k].pts;
     return t;
   }
-  function ranked() {
+  /* Everyone in the room, host included. Used for the lobby list. */
+  function allPlayers() {
     var out = [];
     for (var id in state.players) {
       var p = state.players[id];
@@ -94,22 +95,21 @@
       out.push({ id: id, name: p.name, emoji: avatarOf(id),
                  score: totalFor(p), joinedAt: p.joinedAt || 0 });
     }
+    out.sort(function (a, b) { return a.joinedAt - b.joinedAt; });
+    return out;
+  }
+  /* Players who are competing. The host runs the round, so they sit out. */
+  function ranked() {
+    var out = allPlayers().filter(function (p) { return p.id !== state.hostId; });
     out.sort(function (a, b) { return b.score - a.score || a.joinedAt - b.joinedAt; });
     return out;
   }
   function answeredCount() {
-    var n = 0;
-    for (var id in state.players) {
-      var p = state.players[id];
-      if (p && p.name && answersOf(p)[state.qIndex]) n++;
-    }
-    return n;
+    return ranked().filter(function (p) {
+      return !!answersOf(state.players[p.id])[state.qIndex];
+    }).length;
   }
-  function playerCount() {
-    var n = 0;
-    for (var id in state.players) if (state.players[id] && state.players[id].name) n++;
-    return n;
-  }
+  function playerCount() { return ranked().length; }
 
   /* ------------------------------------------------------------------ writes */
   function TS() { return firebase.database.ServerValue.TIMESTAMP; }
@@ -123,7 +123,7 @@
     ref.child("hostId").transaction(function (cur) { return cur === null ? me.id : undefined; });
   }
   function doAnswer(i) {
-    if (state.phase !== "question" || !joined()) return;
+    if (state.phase !== "question" || !joined() || isHost()) return;
     if (answersOf(state.players[me.id])[state.qIndex]) return;
     var ms = Math.min(SECONDS * 1000, Math.max(0, now() - (state.startedAt || now())));
     var right = QUESTIONS[state.qIndex] && QUESTIONS[state.qIndex].c === i;
@@ -182,8 +182,8 @@
     b.push('<div class="sp"></div>');
     if (!connected) b.push('<div class="chip">Connecting…</div>');
     if (joined()) {
-      b.push('<div class="chip">' + esc(avatarOf(me.id)) + " " +
-        esc(state.players[me.id].name) + " &middot; " + totalFor(state.players[me.id]) + " pts</div>");
+      b.push('<div class="chip">' + esc(avatarOf(me.id)) + " " + esc(state.players[me.id].name) +
+        (isHost() ? "" : " &middot; " + totalFor(state.players[me.id]) + " pts") + "</div>");
     }
     if (isHost()) b.push('<div class="chip hostchip">Host</div>');
     b.push("</div>");
@@ -209,7 +209,7 @@
       'rel="noopener noreferrer">Play on Spotify</a></div>';
   }
   function lobbyList() {
-    var r = ranked();
+    var r = allPlayers();
     if (!r.length) return '<p class="muted">Nobody has joined yet. You could be first.</p>';
     return '<div><div class="eyebrow" style="margin-bottom:10px">In the lobby &middot; ' + r.length +
       '</div><div class="pills">' + r.map(function (p) {
@@ -225,7 +225,7 @@
     if (state.phase === "lobby") {
       inner = '<div class="row"><button class="btn host" data-act="start"' +
         (playerCount() ? "" : " disabled") + ">Start the quiz</button>" +
-        '<span class="muted">' + playerCount() + " in the lobby</span></div>";
+        '<span class="muted">' + playerCount() + " ready to play, plus you hosting</span></div>";
     } else if (state.phase === "question") {
       inner = '<div class="row"><button class="btn host" data-act="reveal">Reveal the answer</button></div>';
     } else if (state.phase === "reveal") {
@@ -273,16 +273,23 @@
     var elapsed = (now() - (state.startedAt || now())) / 1000;
     var expired = elapsed >= SECONDS;
     var locked = !!mine || expired || !joined();
-    var lanes = q.a.map(function (t, i) {
-      return '<button class="lane' + (mine && mine.choice === i ? " pick" : "") +
-        '" data-pick="' + i + '"' + (locked ? " disabled" : "") + '>' +
-        '<span class="n">' + (i + 1) + "</span><span>" + esc(t) + "</span>" +
-        (mine && mine.choice === i ? '<span class="tag">locked in</span>' : "") + "</button>";
-    }).join("");
+    var lanes = isHost()
+      ? q.a.map(function (t, i) {
+          return '<button class="lane' + (i === q.c ? " hostkey" : "") + '" disabled>' +
+            '<span class="n">' + (i + 1) + "</span><span>" + esc(t) + "</span>" +
+            (i === q.c ? '<span class="tag">answer</span>' : "") + "</button>";
+        }).join("")
+      : q.a.map(function (t, i) {
+          return '<button class="lane' + (mine && mine.choice === i ? " pick" : "") +
+            '" data-pick="' + i + '"' + (locked ? " disabled" : "") + '>' +
+            '<span class="n">' + (i + 1) + "</span><span>" + esc(t) + "</span>" +
+            (mine && mine.choice === i ? '<span class="tag">locked in</span>' : "") + "</button>";
+        }).join("");
     var timer = expired ? '<div class="timer done"><i></i></div>'
       : '<div class="timer"><i style="animation-duration:' + SECONDS +
         "s;animation-delay:-" + elapsed.toFixed(2) + 's"></i></div>';
-    var status = !joined() ? "You're not in this round."
+    var status = isHost() ? "You're hosting, so you're sitting this one out. The answer is marked for you."
+      : !joined() ? "You're not in this round."
       : mine ? "Answer locked. Waiting for everyone else."
       : expired ? "Time's up. Waiting on the host."
       : "Pick a lane. Keys 1 to 4 work too.";

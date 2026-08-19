@@ -9,6 +9,8 @@ update for everybody in real time.
 ## How a round runs
 
 1. Everyone opens the link and joins. The first person in gets the host controls.
+   The host runs the round and does not compete: they see each answer marked in
+   advance so they can read it out, and they stay off the leaderboard.
 2. The host presses **Start the quiz**. Everyone sees question 1 at the same time.
 3. People answer by clicking a lane, or pressing keys 1 to 4.
 4. The host presses **Reveal the answer**, then **Next question**.
