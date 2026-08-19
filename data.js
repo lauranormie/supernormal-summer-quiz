@@ -75,9 +75,9 @@ var QUESTIONS = [
   { q: "What is the largest island in the Mediterranean?",
     a: ["Sardinia", "Cyprus", "Sicily", "Corsica"], c: 2,
     why: "Sicily, at just under 26,000 square kilometers. Sardinia comes second." },
-  { q: "The 2026 World Cup was the first ever shared by three host countries. Which three?",
-    a: ["USA, Canada, and Mexico", "USA, Mexico, and Costa Rica", "Canada, Mexico, and Brazil", "USA, Canada, and Jamaica"], c: 0,
-    why: "The first three nation World Cup, the first with 48 teams, and the first to run to 104 matches." }
+  { q: "Who won the 2026 World Cup?",
+    a: ["Argentina", "Spain", "France", "Brazil"], c: 1,
+    why: "Spain beat Argentina 1-0 at MetLife Stadium, Ferran Torres scoring in extra time. Their second title after 2010, at the first World Cup shared by three host countries." }
 ];
 
 var EMOJI = ["\u2600\ufe0f", "\ud83c\udf49", "\ud83c\udfd6\ufe0f", "\ud83c\udf66",
