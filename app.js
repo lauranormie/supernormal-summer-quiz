@@ -473,7 +473,7 @@
 
   function viewGate(wrong) {
     return '<main><div class="intro"><div class="introtext">' +
-      '<div class="eyebrow">Supernormal team round</div>' +
+      '<div class="eyebrow">Supernormal summer quiz 2026</div>' +
       "<h1>Come on in, the water's Super</h1></div>" + heroHtml() + '</div>' +
       '<div class="card"><div class="field">' +
       '<label class="eyebrow" for="pw">Password</label>' +
