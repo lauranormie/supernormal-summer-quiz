@@ -234,12 +234,13 @@
       "answered together, live. The fastest correct answer takes the most points. " +
       "The host drives the pace, so all you do is pick a lane.</p></div>" +
       heroHtml() + "</div>" +
-      '<div class="card"><label class="eyebrow" for="nm">Your name on the board</label>' +
-      '<div class="row"><input id="nm" type="text" placeholder="e.g. Laura" maxlength="24" ' +
-      'autocomplete="off" value="' + esc(me.name) + '">' +
-      '<button class="btn" data-act="join">Join the quiz</button></div>' +
-      '<label class="eyebrow" for="nm">Pick your emoji</label>' + emojiPicker() +
+      '<div class="card">' +
+      '<div class="field"><label class="eyebrow" for="nm">1. Your name on the board</label>' +
+      '<input id="nm" type="text" placeholder="e.g. Laura" maxlength="24" ' +
+      'autocomplete="off" value="' + esc(me.name) + '"></div>' +
+      '<div class="field"><span class="eyebrow">2. Pick your emoji</span>' + emojiPicker() +
       '<p class="muted">Your name and emoji show on the board all round.</p></div>' +
+      '<div class="row"><button class="btn" data-act="join">Join the quiz</button></div></div>' +
       trackHtml() + lobbyList() + "</main>";
   }
 
