@@ -243,9 +243,6 @@
 
   function viewJoin() {
     return "<main>" +
-      '<div class="intro"><div class="introtext">' +
-      '<div class="eyebrow">Live team round &middot; ' + QUESTIONS.length + " questions</div></div>" +
-      heroHtml() + "</div>" +
       '<div class="card">' +
       '<div class="field"><label class="eyebrow" for="nm">1. Name</label>' +
       '<input id="nm" type="text" placeholder="e.g. Laura" maxlength="24" ' +
@@ -261,13 +258,13 @@
     return "<main>" +
       '<div class="intro"><div class="introtext">' +
       '<div class="eyebrow">Live team round &middot; ' + QUESTIONS.length + " questions</div>" +
-      "<h1>You are in. Wait for the whistle.</h1></div>" + heroHtml(true) + "</div>" +
-      '<p class="lede">' + (hn ? esc(hn) + " starts the round when everyone has arrived."
-        : "Nobody is hosting yet. Someone needs to take the controls.") + "</p>" +
+      "<h1>You're in. Wait for the whistle.</h1></div>" + heroHtml(true) + "</div>" +
+      '<p class="lede">' + (hn ? esc(hn) + " starts the round when everyone's arrived."
+        : "Nobody's hosting yet. Someone needs to take the controls.") + "</p>" +
       lobbyList() + trackHtml() + hostControls() +
       '<div class="note"><b>How scoring works.</b> A correct answer is 100 points, plus up to 50 more ' +
       "for speed. There are " + SECONDS + " seconds on each question. Wrong answers cost you " +
-      "nothing, so it is always worth a guess.</div></main>";
+      "nothing, so it's always worth a guess.</div></main>";
   }
 
   function viewQuestion() {
@@ -285,9 +282,9 @@
     var timer = expired ? '<div class="timer done"><i></i></div>'
       : '<div class="timer"><i style="animation-duration:' + SECONDS +
         "s;animation-delay:-" + elapsed.toFixed(2) + 's"></i></div>';
-    var status = !joined() ? "You are not in this round."
+    var status = !joined() ? "You're not in this round."
       : mine ? "Answer locked. Waiting for everyone else."
-      : expired ? "Time is up. Waiting on the host."
+      : expired ? "Time's up. Waiting on the host."
       : "Pick a lane. Keys 1 to 4 work too.";
     return "<main>" + timer +
       '<div><div class="eyebrow">Question ' + (state.qIndex + 1) + " of " + QUESTIONS.length +
@@ -330,7 +327,7 @@
       : (mine && mine.choice === q.c)
         ? '<div class="eyebrow" style="color:var(--right)">Correct &middot; +' + mine.pts + " points</div>"
       : mine ? '<div class="eyebrow" style="color:var(--wrong)">Not this time</div>'
-      : '<div class="eyebrow" style="color:var(--wrong)">You did not answer</div>';
+      : "<div class=\"eyebrow\" style=\"color:var(--wrong)\">You didn't answer</div>";
     return "<main>" + verdict + '<h2 class="q-text">' + esc(q.q) + "</h2>" +
       '<div class="lanes">' + lanes + "</div>" +
       '<div class="note">' + q.why + "</div>" +
@@ -349,7 +346,7 @@
     }).join("");
     var best = r.length ? r[0] : null;
     return '<main class="wide">' +
-      '<div><div class="eyebrow">That is the round</div><h1>' +
+      "<div><div class=\"eyebrow\">That's the round</div><h1>" +
       (best ? esc(best.name) + " takes it" : "No scores this round") + "</h1></div>" +
       (pods ? '<div class="podium">' + pods + "</div>" : "") +
       '<div class="stat"><div><span class="k">Players</span><span class="v">' + r.length +
@@ -474,7 +471,7 @@
       '<div class="card"><div class="field">' +
       '<label class="eyebrow" for="pw">Password</label>' +
       '<input id="pw" type="password" autocomplete="off" placeholder="Paste here"></div>' +
-      (wrong ? '<div class="banner">That is not it. Check the message in Slack and try again.</div>' : "") +
+      (wrong ? "<div class=\"banner\">That's not it. Check the message in Slack and try again.</div>" : "") +
       '<div class="row"><button class="btn" data-act="unlock">Let me in</button></div></div></main>';
   }
 
