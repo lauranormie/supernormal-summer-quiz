@@ -5,10 +5,13 @@
   /* ------------------------------------------------------------------ config */
   /* Paste the config from Firebase console: Project settings > Your apps > Web. */
   var firebaseConfig = window.__SQ_CONFIG__ || {
-    apiKey: "PASTE_API_KEY",
-    authDomain: "PASTE_PROJECT.firebaseapp.com",
-    databaseURL: "https://PASTE_PROJECT-default-rtdb.firebaseio.com",
-    projectId: "PASTE_PROJECT"
+    apiKey: "AIzaSyAnbi2E-TqRDQ_KzI8fYspZ1ud35b2xoeQ",
+    authDomain: "supernormal-summer-quiz.firebaseapp.com",
+    databaseURL: "https://supernormal-summer-quiz-default-rtdb.firebaseio.com",
+    projectId: "supernormal-summer-quiz",
+    storageBucket: "supernormal-summer-quiz.firebasestorage.app",
+    messagingSenderId: "54727944185",
+    appId: "1:54727944185:web:26618462a8cb851f44ff28"
   };
 
   var SECONDS = 25;
@@ -443,7 +446,8 @@
       'then commit and push. Full steps are in the README.</p></div>' + heroHtml() + '</div></main>';
   }
 
-  if (firebaseConfig.apiKey === "PASTE_API_KEY") {
+  if (firebaseConfig.apiKey === "PASTE_API_KEY" || !firebaseConfig.databaseURL ||
+      firebaseConfig.databaseURL.indexOf("PASTE") !== -1) {
     fatal = setupCard();
     render();
     return;
