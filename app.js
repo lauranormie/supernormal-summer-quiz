@@ -14,6 +14,11 @@
     appId: "1:54727944185:web:26618462a8cb851f44ff28"
   };
 
+  /* SHA-256 of the room password. To change it, run:
+     node -e "crypto.subtle.digest('SHA-256',new TextEncoder().encode('YOURPASS')).then(b=>console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')))"
+     Current password: water-is-super */
+  var PASS_HASH = "51f2e36a0890f037482f188295738d30f9bd6e9fae19e4bf8b22bd2f25a343ee";
+
   var SECONDS = 25;
   var TARGET_MIN = 30;
   var ROOM = ((new URLSearchParams(location.search).get("room") || "summer-2026")
@@ -23,7 +28,7 @@
   var BLANK = { phase: "lobby", qIndex: 0, startedAt: null, roundStartedAt: null,
                 hostId: null, players: {} };
   var state = BLANK;
-  var db = null, ref = null, skew = 0, connected = false, fatal = null;
+  var db = null, ref = null, skew = 0, connected = false, fatal = null, gateWrong = false;
 
   function now() { return Date.now() + skew; }
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
@@ -229,7 +234,7 @@
     return "<main>" +
       '<div class="intro"><div class="introtext">' +
       '<div class="eyebrow">Live team round &middot; ' + QUESTIONS.length + " questions</div>" +
-      "<h1>Grab a lane</h1>" +
+      "<h1>Come on in, the water's Super</h1>" +
       '<p class="lede">' + QUESTIONS.length + " questions about Supernormal, the team, and the summer, " +
       "answered together, live. The fastest correct answer takes the most points. " +
       "The host drives the pace, so all you do is pick a lane.</p></div>" +
@@ -368,6 +373,12 @@
   function render() {
     var app = document.getElementById("app");
     if (fatal) { app.innerHTML = fatal; return; }
+    if (!unlocked) {
+      app.innerHTML = viewGate(gateWrong);
+      var pw = document.getElementById("pw");
+      if (pw && !("ontouchstart" in window)) pw.focus();
+      return;
+    }
 
     /* keep whatever the player is typing, since remote updates re-render */
     var act = document.activeElement;
@@ -422,7 +433,8 @@
     var btn = e.target.closest("[data-act]");
     if (!btn || btn.disabled) return;
     var a = btn.getAttribute("data-act");
-    if (a === "join") doJoin();
+    if (a === "unlock") doUnlock();
+    else if (a === "join") doJoin();
     else if (a === "finish") { if (confirm("End the round now and go straight to the results?")) hostAct(a); }
     else if (a === "reset") { if (confirm("Reset every score and go back to the lobby?")) hostAct(a); }
     else hostAct(a);
@@ -431,6 +443,7 @@
   document.addEventListener("keydown", function (e) {
     if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
       if (e.key === "Enter" && e.target.id === "nm") doJoin();
+      if (e.key === "Enter" && e.target.id === "pw") doUnlock();
       return;
     }
     if (state.phase !== "question") return;
@@ -439,6 +452,27 @@
   });
 
   /* ------------------------------------------------------------------ boot */
+  function sha256Hex(str) {
+    return crypto.subtle.digest("SHA-256", new TextEncoder().encode(str)).then(function (buf) {
+      return Array.prototype.map.call(new Uint8Array(buf), function (b) {
+        return b.toString(16).padStart(2, "0");
+      }).join("");
+    });
+  }
+
+  function viewGate(wrong) {
+    return '<main><div class="intro"><div class="introtext">' +
+      '<div class="eyebrow">Supernormal team round</div>' +
+      "<h1>Come on in, the water's Super</h1>" +
+      '<p class="lede">This one is just for the team. Pop in the password from Slack ' +
+      'and you are through.</p></div>' + heroHtml() + '</div>' +
+      '<div class="card"><div class="field">' +
+      '<label class="eyebrow" for="pw">Password</label>' +
+      '<input id="pw" type="password" autocomplete="off" placeholder="Password from Slack"></div>' +
+      (wrong ? '<div class="banner">That is not it. Check the message in Slack and try again.</div>' : "") +
+      '<div class="row"><button class="btn" data-act="unlock">Let me in</button></div></div></main>';
+  }
+
   function setupCard() {
     return '<main><div class="intro"><div class="introtext">' +
       '<div class="eyebrow">Setup needed</div><h1>Add your Firebase config</h1>' +
@@ -447,6 +481,29 @@
       'then commit and push. Full steps are in the README.</p></div>' + heroHtml() + '</div></main>';
   }
 
+  var unlocked = false;
+  try { unlocked = localStorage.getItem("sq_pass") === PASS_HASH; } catch (e) {}
+
+  function doUnlock() {
+    var el = document.getElementById("pw");
+    var v = (el && el.value) || "";
+    if (!v) { if (el) el.focus(); return; }
+    sha256Hex(v).then(function (h) {
+      if (h === PASS_HASH) {
+        try { localStorage.setItem("sq_pass", h); } catch (e) {}
+        unlocked = true;
+        gateWrong = false;
+        boot();
+      } else {
+        gateWrong = true;
+        render();
+        var f = document.getElementById("pw");
+        if (f) { f.value = ""; f.focus(); }
+      }
+    });
+  }
+
+  function boot() {
   if (firebaseConfig.apiKey === "PASTE_API_KEY" || !firebaseConfig.databaseURL ||
       firebaseConfig.databaseURL.indexOf("PASTE") !== -1) {
     fatal = setupCard();
@@ -482,5 +539,8 @@
 
   ref.child("players/" + me.id).onDisconnect().update({ online: false });
   render();
+  }
+
   setInterval(updateClock, 1000);
+  if (unlocked) boot(); else render();
 })();

@@ -18,6 +18,26 @@ update for everybody in real time.
 Scoring is 100 points for a correct answer, plus up to 50 more for speed. There is
 a clock in the top bar counting up to the 30 minute mark so the host can pace it.
 
+## Password
+
+The quiz is behind a password so passers-by cannot wander in. It is currently
+**water-is-super**. Share it with the team alongside the link.
+
+Only a SHA-256 hash of it lives in `app.js`, and the unlock is remembered per
+browser, so people type it once. To change it, run this and paste the result over
+`PASS_HASH` in `app.js`:
+
+```
+node -e "crypto.subtle.digest('SHA-256',new TextEncoder().encode('YOURPASS')).then(b=>console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')))"
+```
+
+What the password does and does not do: it stops someone stumbling onto the page
+and playing or messing with the leaderboard. It does **not** hide the questions.
+`data.js` is a static file on a public site, so anyone can request it directly and
+read the answers, password or not. For a team quiz that is the right trade-off. If
+you ever need the answers genuinely hidden, they would have to be encrypted rather
+than merely gated.
+
 ## Setup
 
 The quiz needs a Firebase Realtime Database to share scores between players. It is

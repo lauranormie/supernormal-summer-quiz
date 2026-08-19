@@ -93,10 +93,10 @@ p{margin:0;max-width:62ch}
 .btn:disabled{opacity:.38;cursor:not-allowed;filter:none;transform:none}
 :focus-visible{outline:2px solid var(--blue-400);outline-offset:3px;border-radius:6px}
 .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-input[type=text]{background:rgba(2,16,30,.65);border:1px solid var(--line-2);border-radius:999px;
+input[type=text],input[type=password]{background:rgba(2,16,30,.65);border:1px solid var(--line-2);border-radius:999px;
   padding:13px 20px;color:var(--white);min-width:min(300px,100%);font-size:16px}
-input[type=text]::placeholder{color:var(--g400)}
-input[type=text]:focus{outline:none;border-color:var(--blue-500)}
+input[type=text]::placeholder,input[type=password]::placeholder{color:var(--g400)}
+input[type=text]:focus,input[type=password]:focus{outline:none;border-color:var(--blue-500)}
 
 /* ---- lanes (answers) ---- */
 .lanes{display:grid;gap:11px}
@@ -175,7 +175,7 @@ input[type=text]:focus{outline:none;border-color:var(--blue-500)}
 .hero.s{width:min(150px,100%)}
 @media(max-width:620px){.hero,.hero.s{width:160px;margin:0 auto}}
 .field{display:flex;flex-direction:column;gap:10px}
-.field input[type=text]{width:100%}
+.field input[type=text],.field input[type=password]{width:100%}
 .picker{display:flex;flex-wrap:wrap;gap:8px}
 .emo{width:46px;height:46px;border-radius:12px;font-size:22px;line-height:1;cursor:pointer;
   background:var(--panel);border:1px solid var(--line);padding:0;
