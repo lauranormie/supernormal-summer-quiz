@@ -59,7 +59,22 @@ var QUESTIONS = [
     why: "Samhradh. The other three are spring, autumn, and winter." },
   { q: "Where were the first modern Olympic Games held, in 1896?",
     a: ["Paris", "Rome", "Athens", "London"], c: 2,
-    why: "Athens, with 14 nations and no swimming pool. The swimmers raced in the sea." }
+    why: "Athens, with 14 nations and no swimming pool. The swimmers raced in the sea." },
+  { q: "Which Greek island is traditionally said to be the home of Odysseus?",
+    a: ["Corfu", "Ithaca", "Crete", "Rhodes"], c: 1,
+    why: "Ithaca, where Penelope spent ten years waiting for him to find his way back." },
+  { q: "The dog days of summer take their name from which star?",
+    a: ["Sirius", "Polaris", "Vega", "Betelgeuse"], c: 0,
+    why: "Sirius, the Dog Star. The Romans blamed it for the worst of the summer heat." },
+  { q: "What does SPF stand for on a bottle of sunscreen?",
+    a: ["Sun Protection Factor", "Solar Protection Formula", "Skin Protection Filter", "Sun Prevention Factor"], c: 0,
+    why: "Sun Protection Factor. It rates protection from UVB, which is why you also want a UVA rating." },
+  { q: "Roughly how much of a watermelon is water?",
+    a: ["62%", "72%", "82%", "92%"], c: 3,
+    why: "About 92%. The clue was in the name." },
+  { q: "What is the largest island in the Mediterranean?",
+    a: ["Sardinia", "Cyprus", "Sicily", "Corsica"], c: 2,
+    why: "Sicily, at just under 26,000 square kilometers. Sardinia comes second." }
 ];
 
 var EMOJI = ["\u2600\ufe0f", "\ud83c\udf49", "\ud83c\udfd6\ufe0f", "\ud83c\udf66",
