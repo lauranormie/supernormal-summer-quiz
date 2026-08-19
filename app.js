@@ -244,11 +244,7 @@
   function viewJoin() {
     return "<main>" +
       '<div class="intro"><div class="introtext">' +
-      '<div class="eyebrow">Live team round &middot; ' + QUESTIONS.length + " questions</div>" +
-      "<h1>Come on in, the water's Super</h1>" +
-      '<p class="lede">' + QUESTIONS.length + " questions about Supernormal, the team, and the summer, " +
-      "answered together, live. The fastest correct answer takes the most points. " +
-      "The host drives the pace, so all you do is pick a lane.</p></div>" +
+      '<div class="eyebrow">Live team round &middot; ' + QUESTIONS.length + " questions</div></div>" +
       heroHtml() + "</div>" +
       '<div class="card">' +
       '<div class="field"><label class="eyebrow" for="nm">1. Name</label>' +
