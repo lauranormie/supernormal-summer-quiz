@@ -68,7 +68,10 @@
     try { localStorage.setItem("sq_emoji", myEmoji); } catch (e) {}
   }
 
-  function joined() { return !!state.players[me.id]; }
+  function joined() {
+    var p = state.players[me.id];
+    return !!(p && p.name);
+  }
   function isHost() { return state.hostId === me.id; }
   function avatarOf(id) {
     var p = state.players[id];
@@ -87,7 +90,8 @@
     var out = [];
     for (var id in state.players) {
       var p = state.players[id];
-      out.push({ id: id, name: p.name || "Someone", emoji: avatarOf(id),
+      if (!p || !p.name) continue;
+      out.push({ id: id, name: p.name, emoji: avatarOf(id),
                  score: totalFor(p), joinedAt: p.joinedAt || 0 });
     }
     out.sort(function (a, b) { return b.score - a.score || a.joinedAt - b.joinedAt; });
@@ -95,10 +99,17 @@
   }
   function answeredCount() {
     var n = 0;
-    for (var id in state.players) if (answersOf(state.players[id])[state.qIndex]) n++;
+    for (var id in state.players) {
+      var p = state.players[id];
+      if (p && p.name && answersOf(p)[state.qIndex]) n++;
+    }
     return n;
   }
-  function playerCount() { var n = 0; for (var k in state.players) n++; return n; }
+  function playerCount() {
+    var n = 0;
+    for (var id in state.players) if (state.players[id] && state.players[id].name) n++;
+    return n;
+  }
 
   /* ------------------------------------------------------------------ writes */
   function TS() { return firebase.database.ServerValue.TIMESTAMP; }
@@ -537,7 +548,6 @@
     render();
   });
 
-  ref.child("players/" + me.id).onDisconnect().update({ online: false });
   render();
   }
 
