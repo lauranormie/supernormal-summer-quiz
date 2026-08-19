@@ -20,7 +20,7 @@
   var PASS_HASH = "47d0605f9e7ac66440f280933e13b3dc94938dd30d4da4b9900102fdf0c27adf";
 
   var SECONDS = 25;
-  var DRAW_SECONDS = 90;
+  var DRAW_SECONDS = 180;
   var VOTE_POINTS = 50;
   var TARGET_MIN = 30;
   var ROOM = ((new URLSearchParams(location.search).get("room") || "summer-2026")
@@ -411,13 +411,13 @@
         "s;animation-delay:-" + elapsed.toFixed(2) + 's"></i></div>';
 
     var head = '<div><div class="eyebrow">Drawing round &middot; ' +
-      Math.ceil(left) + ' seconds left</div>' +
+      fmtClock(left * 1000) + ' left</div>' +
       '<h2 class="q-text" style="margin-top:10px">' + esc(q.q) + "</h2></div>";
 
     if (isHost()) {
       return "<main>" + timer + head +
         '<div class="note"><b>You are running this one.</b> Everyone else is drawing. ' +
-        'Give them the full ninety seconds, then show the gallery so people can vote.</div>' +
+        'They get ' + DRAW_SECONDS + ' seconds, then show the gallery so people can vote.</div>' +
         '<div class="row" style="justify-content:space-between">' +
         '<span class="muted">Drawings are saved as they finish.</span>' +
         '<span class="chip">' + answeredCount() + " / " + playerCount() + " submitted</span></div>" +

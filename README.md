@@ -85,7 +85,7 @@ project.
 ## The drawing round
 
 One item in `data.js` is `type: "draw"` instead of a multiple choice question.
-Everyone gets 90 seconds on a shared canvas, then the drawings appear in a gallery
+Everyone gets three minutes on a shared canvas, then the drawings appear in a gallery
 and people vote. Each vote is worth 50 points to the artist, nobody can vote for
 their own, and the host neither draws nor votes.
 
