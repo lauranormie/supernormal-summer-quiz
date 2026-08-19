@@ -477,7 +477,7 @@
       "<h1>Come on in, the water's Super</h1></div>" + heroHtml() + '</div>' +
       '<div class="card"><div class="field">' +
       '<label class="eyebrow" for="pw">Password</label>' +
-      '<input id="pw" type="password" autocomplete="off" placeholder="Password from Slack"></div>' +
+      '<input id="pw" type="password" autocomplete="off" placeholder="Paste here"></div>' +
       (wrong ? '<div class="banner">That is not it. Check the message in Slack and try again.</div>' : "") +
       '<div class="row"><button class="btn" data-act="unlock">Let me in</button></div></div></main>';
   }
