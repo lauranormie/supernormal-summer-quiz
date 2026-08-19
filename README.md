@@ -80,6 +80,22 @@ trade-off for a throwaway static app, but it does mean the room is not private.
 When the quiz is over, either set the rules to `false` or delete the Firebase
 project.
 
+## Bump the version when you deploy
+
+GitHub Pages serves `app.js` and `data.js` with `cache-control: max-age=600`, so for
+ten minutes after a change some browsers keep running the old files. During a live
+round that could put two players on different question sets.
+
+So whenever you change `app.js` or `data.js`, bump the `?v=` number on both script
+tags in `index.html`:
+
+```html
+<script src="data.js?v=3"></script>
+<script src="app.js?v=3"></script>
+```
+
+That makes the change take effect immediately for everyone.
+
 ## Editing the questions
 
 Everything is in `data.js`:
