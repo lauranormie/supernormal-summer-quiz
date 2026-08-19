@@ -75,9 +75,9 @@ var QUESTIONS = [
   { q: "What is the largest island in the Mediterranean?",
     a: ["Sardinia", "Cyprus", "Sicily", "Corsica"], c: 2,
     why: "Sicily, at just under 26,000 square kilometers. Sardinia comes second." },
-  { q: "Who won the 2026 World Cup?",
-    a: ["Argentina", "Spain", "France", "Brazil"], c: 1,
-    why: "Spain beat Argentina 1-0 at MetLife Stadium, Ferran Torres scoring in extra time. Their second title after 2010, at the first World Cup shared by three host countries." }
+  { q: "How did the 2026 World Cup final finish?",
+    a: ["Spain 1-0 Argentina", "Argentina 2-1 Spain", "Spain 3-2 Argentina", "Argentina 1-0 Spain"], c: 0,
+    why: "Spain 1-0, settled by Ferran Torres in the 106th minute of extra time at MetLife Stadium. Spain's second title after 2010." }
 ];
 
 var EMOJI = ["\u2600\ufe0f", "\ud83c\udf49", "\ud83c\udfd6\ufe0f", "\ud83c\udf66",
