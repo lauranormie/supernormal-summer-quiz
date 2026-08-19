@@ -82,6 +82,21 @@ trade-off for a throwaway static app, but it does mean the room is not private.
 When the quiz is over, either set the rules to `false` or delete the Firebase
 project.
 
+## The drawing round
+
+One item in `data.js` is `type: "draw"` instead of a multiple choice question.
+Everyone gets 90 seconds on a shared canvas, then the drawings appear in a gallery
+and people vote. Each vote is worth 50 points to the artist, nobody can vote for
+their own, and the host neither draws nor votes.
+
+Drawings are stored as compressed WebP data URLs on the player's answer, around
+15 to 25KB each, so a full round sits comfortably inside the Firebase free tier.
+
+Work in progress is sent automatically if the clock runs out or the host shows the
+gallery early, so nobody loses a drawing by forgetting to press Done.
+
+Tunable at the top of `app.js`: `DRAW_SECONDS` and `VOTE_POINTS`.
+
 ## Bump the version when you deploy
 
 GitHub Pages serves `app.js` and `data.js` with `cache-control: max-age=600`, so for

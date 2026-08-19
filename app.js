@@ -20,6 +20,8 @@
   var PASS_HASH = "47d0605f9e7ac66440f280933e13b3dc94938dd30d4da4b9900102fdf0c27adf";
 
   var SECONDS = 25;
+  var DRAW_SECONDS = 90;
+  var VOTE_POINTS = 50;
   var TARGET_MIN = 30;
   var ROOM = ((new URLSearchParams(location.search).get("room") || "summer-2026")
     .replace(/[^a-z0-9-]/gi, "").slice(0, 40)) || "summer-2026";
@@ -36,6 +38,9 @@
     return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
       .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
+  function isDraw(q) { return !!(q && q.type === "draw"); }
+  function secondsFor(qi) { return isDraw(QUESTIONS[qi]) ? DRAW_SECONDS : SECONDS; }
+
   function normalize(v) {
     var s = v || {};
     return {
@@ -44,7 +49,8 @@
       startedAt: s.startedAt || null,
       roundStartedAt: s.roundStartedAt || null,
       hostId: s.hostId || null,
-      players: s.players || {}
+      players: s.players || {},
+      votes: s.votes || {}
     };
   }
 
@@ -81,9 +87,25 @@
 
   /* ------------------------------------------------------------------ scoring */
   function scoreFor(ms) { return 100 + Math.round(50 * Math.max(0, 1 - ms / (SECONDS * 1000))); }
-  function totalFor(p) {
+
+  /* How many people voted for this player's drawing on question qi. */
+  function votesFor(playerId, qi) {
+    var cast = state.votes[qi] || {}, n = 0;
+    for (var voter in cast) if (cast[voter] === playerId) n++;
+    return n;
+  }
+  function myVote(qi) { return (state.votes[qi] || {})[me.id] || null; }
+
+  function ptsFor(playerId, qi) {
+    var p = state.players[playerId];
+    var a = answersOf(p)[qi];
+    if (!a) return 0;
+    if (isDraw(QUESTIONS[qi])) return VOTE_POINTS * votesFor(playerId, qi);
+    return a.pts || 0;
+  }
+  function totalFor(p, id) {
     var a = answersOf(p), t = 0;
-    for (var k in a) if (a[k] && a[k].pts) t += a[k].pts;
+    for (var k in a) t += ptsFor(id, k);
     return t;
   }
   /* Everyone in the room, host included. Used for the lobby list. */
@@ -93,7 +115,7 @@
       var p = state.players[id];
       if (!p || !p.name) continue;
       out.push({ id: id, name: p.name, emoji: avatarOf(id),
-                 score: totalFor(p), joinedAt: p.joinedAt || 0 });
+                 score: totalFor(p, id), joinedAt: p.joinedAt || 0 });
     }
     out.sort(function (a, b) { return a.joinedAt - b.joinedAt; });
     return out;
@@ -148,6 +170,81 @@
     else if (act === "takehost") ref.child("hostId").set(me.id);
   }
 
+  /* ------------------------------------------------------------------ pad */
+  var PAD_W = 640, PAD_H = 420, PAPER = "#fbf6ec";
+  var pad = null, pctx = null, strokes = [], stroke = null, padFor = -1;
+  var INKS = ["#12212e", "#0f8eff", "#ec4899", "#eab308", "#14b8a6"];
+  var ink = INKS[0], nib = 4;
+
+  function clearPad() { pctx.fillStyle = PAPER; pctx.fillRect(0, 0, PAD_W, PAD_H); }
+  function paintStroke(st) {
+    if (!st.pts.length) return;
+    pctx.strokeStyle = st.ink; pctx.lineWidth = st.nib;
+    pctx.lineCap = "round"; pctx.lineJoin = "round";
+    pctx.beginPath();
+    pctx.moveTo(st.pts[0][0], st.pts[0][1]);
+    for (var i = 1; i < st.pts.length; i++) pctx.lineTo(st.pts[i][0], st.pts[i][1]);
+    if (st.pts.length === 1) pctx.lineTo(st.pts[0][0] + 0.1, st.pts[0][1]);
+    pctx.stroke();
+  }
+  function repaint() { clearPad(); strokes.forEach(paintStroke); }
+
+  function padPos(e) {
+    var r = pad.getBoundingClientRect();
+    return [(e.clientX - r.left) * (PAD_W / r.width), (e.clientY - r.top) * (PAD_H / r.height)];
+  }
+  function ensurePad() {
+    if (padFor !== state.qIndex) { strokes = []; stroke = null; padFor = state.qIndex; pad = null; }
+    if (pad) return pad;
+    pad = document.createElement("canvas");
+    pad.width = PAD_W; pad.height = PAD_H; pad.className = "pad";
+    pad.setAttribute("aria-label", "Drawing area");
+    pctx = pad.getContext("2d");
+    clearPad();
+    pad.addEventListener("pointerdown", function (e) {
+      if (drawLocked()) return;
+      try { pad.setPointerCapture(e.pointerId); } catch (err) {}
+      stroke = { ink: ink, nib: nib, pts: [padPos(e)] };
+      strokes.push(stroke); paintStroke(stroke);
+    });
+    pad.addEventListener("pointermove", function (e) {
+      if (!stroke) return;
+      stroke.pts.push(padPos(e));
+      repaint();
+    });
+    pad.addEventListener("pointerup", function () { stroke = null; });
+    pad.addEventListener("pointercancel", function () { stroke = null; });
+    return pad;
+  }
+  function alreadySent() {
+    return joined() && !!answersOf(state.players[me.id])[state.qIndex];
+  }
+  function timeLeftOnPad() {
+    return secondsFor(state.qIndex) - (now() - (state.startedAt || now())) / 1000;
+  }
+  /* Can this viewer still put ink on the paper? */
+  function drawLocked() {
+    return isHost() || !joined() || alreadySent() || timeLeftOnPad() <= 0;
+  }
+  function padImage() {
+    var d = pad.toDataURL("image/webp", 0.72);
+    if (d.indexOf("data:image/webp") !== 0) d = pad.toDataURL("image/jpeg", 0.7);
+    if (d.length > 140000) d = pad.toDataURL("image/jpeg", 0.45);
+    return d;
+  }
+  /* `force` sends work that the clock or the host cut short. Without it, the
+     time-up path could never fire, because drawLocked() is true by then. */
+  function submitDrawing(force) {
+    if (!pad || isHost() || !joined() || alreadySent()) return;
+    if (!force && timeLeftOnPad() <= 0) return;
+    if (force && !strokes.length) return;
+    ref.child("players/" + me.id + "/answers/" + state.qIndex).set({ img: padImage() });
+  }
+  function castVote(drawerId) {
+    if (isHost() || !joined() || drawerId === me.id) return;
+    ref.child("votes/" + state.qIndex + "/" + me.id).set(drawerId);
+  }
+
   /* ------------------------------------------------------------------ clock */
   function fmtClock(ms) {
     var t = Math.max(0, Math.floor(ms / 1000)), m = Math.floor(t / 60), s = t % 60;
@@ -183,7 +280,7 @@
     if (!connected) b.push('<div class="chip">Connecting…</div>');
     if (joined()) {
       b.push('<div class="chip">' + esc(avatarOf(me.id)) + " " + esc(state.players[me.id].name) +
-        (isHost() ? "" : " &middot; " + totalFor(state.players[me.id]) + " pts") + "</div>");
+        (isHost() ? "" : " &middot; " + totalFor(state.players[me.id], me.id) + " pts") + "</div>");
     }
     if (isHost()) b.push('<div class="chip hostchip">Host</div>');
     b.push("</div>");
@@ -227,7 +324,8 @@
         (playerCount() ? "" : " disabled") + ">Start the quiz</button>" +
         '<span class="muted">' + playerCount() + " ready to play, plus you hosting</span></div>";
     } else if (state.phase === "question") {
-      inner = '<div class="row"><button class="btn host" data-act="reveal">Reveal the answer</button></div>';
+      inner = '<div class="row"><button class="btn host" data-act="reveal">' +
+        (isDraw(QUESTIONS[state.qIndex]) ? "Show the gallery" : "Reveal the answer") + "</button></div>";
     } else if (state.phase === "reveal") {
       var last = state.qIndex + 1 >= QUESTIONS.length;
       inner = '<div class="row"><button class="btn host" data-act="next">' +
@@ -300,6 +398,86 @@
       '<div class="row" style="justify-content:space-between">' +
       '<span class="muted">' + status + "</span>" +
       '<span class="chip">' + answeredCount() + " / " + playerCount() + " answered</span></div>" +
+      hostControls() + "</main>";
+  }
+
+  function viewDraw() {
+    var q = QUESTIONS[state.qIndex];
+    var elapsed = (now() - (state.startedAt || now())) / 1000;
+    var left = Math.max(0, secondsFor(state.qIndex) - elapsed);
+    var done = joined() && !!answersOf(state.players[me.id])[state.qIndex];
+    var timer = left <= 0 ? '<div class="timer done"><i></i></div>'
+      : '<div class="timer"><i style="animation-duration:' + secondsFor(state.qIndex) +
+        "s;animation-delay:-" + elapsed.toFixed(2) + 's"></i></div>';
+
+    var head = '<div><div class="eyebrow">Drawing round &middot; ' +
+      Math.ceil(left) + ' seconds left</div>' +
+      '<h2 class="q-text" style="margin-top:10px">' + esc(q.q) + "</h2></div>";
+
+    if (isHost()) {
+      return "<main>" + timer + head +
+        '<div class="note"><b>You are running this one.</b> Everyone else is drawing. ' +
+        'Give them the full ninety seconds, then show the gallery so people can vote.</div>' +
+        '<div class="row" style="justify-content:space-between">' +
+        '<span class="muted">Drawings are saved as they finish.</span>' +
+        '<span class="chip">' + answeredCount() + " / " + playerCount() + " submitted</span></div>" +
+        hostControls() + "</main>";
+    }
+    if (!joined()) return viewJoin();
+
+    var tools = done ? "" :
+      '<div class="tools"><div class="inks">' +
+      INKS.map(function (c) {
+        return '<button class="nibbtn' + (c === ink ? " on" : "") + '" data-ink="' + c +
+          '" style="background:' + c + '" aria-label="Ink ' + c + '"></button>';
+      }).join("") + "</div>" +
+      '<button class="btn ghost sm" data-act="undo">Undo</button>' +
+      '<button class="btn ghost sm" data-act="clearpad">Clear</button>' +
+      '<button class="btn" data-act="submitdraw">Done drawing</button></div>';
+
+    return "<main>" + timer + head +
+      '<div id="padslot" class="padwrap' + (done ? " done" : "") + '"></div>' + tools +
+      (done ? '<div class="note"><b>Sent.</b> Sit tight while everyone else finishes.</div>' : "") +
+      '<div class="row" style="justify-content:space-between">' +
+      '<span class="muted">' + (done ? "Your drawing is in."
+        : "Draw it. No pressure, nobody is being marked on technique.") + "</span>" +
+      '<span class="chip">' + answeredCount() + " / " + playerCount() + " submitted</span></div>" +
+      hostControls() + "</main>";
+  }
+
+  function viewGallery() {
+    var q = QUESTIONS[state.qIndex];
+    var mine = myVote(state.qIndex);
+    var entries = ranked().filter(function (p) {
+      return !!answersOf(state.players[p.id])[state.qIndex];
+    });
+    var cards = entries.map(function (p) {
+      var a = answersOf(state.players[p.id])[state.qIndex];
+      var n = votesFor(p.id, state.qIndex);
+      var own = p.id === me.id;
+      var voted = mine === p.id;
+      return '<figure class="art' + (voted ? " voted" : "") + '">' +
+        '<img src="' + a.img + '" alt="Drawing by ' + esc(p.name) + '">' +
+        '<figcaption><span class="av">' + esc(p.emoji) + "</span>" +
+        '<span class="who">' + esc(p.name) + "</span>" +
+        '<span class="tally">' + n + (n === 1 ? " vote" : " votes") + "</span>" +
+        (isHost() || own || !joined() ? ""
+          : '<button class="btn sm' + (voted ? "" : " ghost") + '" data-vote="' + p.id + '">' +
+            (voted ? "Voted" : "Vote") + "</button>") +
+        "</figcaption></figure>";
+    }).join("");
+
+    var note = isHost() ? "Everyone is voting. Each vote is worth " + VOTE_POINTS + " points to the artist."
+      : mine ? "Vote cast. You can change it until the host moves on."
+      : "Pick your favourite. You cannot vote for your own.";
+
+    return "<main class=\"wide\">" +
+      '<div><div class="eyebrow">The gallery</div>' +
+      '<h2 class="q-text" style="margin-top:10px">' + esc(q.q) + "</h2></div>" +
+      (cards ? '<div class="gallery">' + cards + "</div>"
+             : '<p class="muted">Nobody submitted a drawing. Brutal.</p>') +
+      '<div class="note">' + note + "</div>" +
+      '<div><div class="eyebrow" style="margin-bottom:10px">Standings</div>' + boardHtml(6) + "</div>" +
       hostControls() + "</main>";
   }
 
@@ -397,12 +575,21 @@
     var keepVal = null, selA = null, selB = null;
     if (keepId === "nm") { keepVal = act.value; selA = act.selectionStart; selB = act.selectionEnd; }
 
+    var drawItem = isDraw(QUESTIONS[state.qIndex]);
     var body;
     if (state.phase === "lobby") body = joined() ? viewLobby() : viewJoin();
-    else if (state.phase === "question") body = joined() ? viewQuestion() : viewJoin();
-    else if (state.phase === "reveal") body = viewReveal();
+    else if (state.phase === "question") body = drawItem ? viewDraw() : (joined() ? viewQuestion() : viewJoin());
+    else if (state.phase === "reveal") body = drawItem ? viewGallery() : viewReveal();
     else body = viewFinal();
     app.innerHTML = topbar() + body + footerHtml();
+
+    /* The canvas keeps its pixels only if the element itself survives, so it is
+       moved into the freshly rendered slot rather than written as markup. */
+    var slot = document.getElementById("padslot");
+    if (slot) slot.appendChild(ensurePad());
+
+    /* Host moved on before this viewer pressed Done: send what is on the paper. */
+    if (state.phase === "reveal" && drawItem) submitDrawing(true);
 
     if (keepId) {
       var el = document.getElementById(keepId);
@@ -418,8 +605,9 @@
 
     if (ticking) { clearTimeout(ticking); ticking = null; }
     if (state.phase === "question") {
-      var left = SECONDS * 1000 - (now() - (state.startedAt || now()));
+      var left = secondsFor(state.qIndex) * 1000 - (now() - (state.startedAt || now()));
       if (left > 0) ticking = setTimeout(render, Math.min(left + 60, 30000));
+      else if (isDraw(QUESTIONS[state.qIndex])) submitDrawing(true);
     }
   }
 
@@ -439,11 +627,25 @@
       if (joined()) ref.child("players/" + me.id + "/emoji").set(myEmoji);
       return;
     }
+    var inkBtn = e.target.closest("[data-ink]");
+    if (inkBtn) {
+      ink = inkBtn.getAttribute("data-ink");
+      var all = document.querySelectorAll("[data-ink]");
+      for (var j = 0; j < all.length; j++) {
+        all[j].classList.toggle("on", all[j].getAttribute("data-ink") === ink);
+      }
+      return;
+    }
+    var voteBtn = e.target.closest("[data-vote]");
+    if (voteBtn) { castVote(voteBtn.getAttribute("data-vote")); return; }
     var pick = e.target.closest("[data-pick]");
     if (pick && !pick.disabled) { doAnswer(parseInt(pick.getAttribute("data-pick"), 10)); return; }
     var btn = e.target.closest("[data-act]");
     if (!btn || btn.disabled) return;
     var a = btn.getAttribute("data-act");
+    if (a === "undo") { strokes.pop(); repaint(); return; }
+    if (a === "clearpad") { strokes = []; repaint(); return; }
+    if (a === "submitdraw") { submitDrawing(); return; }
     if (a === "unlock") doUnlock();
     else if (a === "join") doJoin();
     else if (a === "finish") { if (confirm("End the round now and go straight to the results?")) hostAct(a); }
