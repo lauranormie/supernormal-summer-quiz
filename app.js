@@ -474,9 +474,7 @@
   function viewGate(wrong) {
     return '<main><div class="intro"><div class="introtext">' +
       '<div class="eyebrow">Supernormal team round</div>' +
-      "<h1>Come on in, the water's Super</h1>" +
-      '<p class="lede">This one is just for the team. Pop in the password from Slack ' +
-      'and you are through.</p></div>' + heroHtml() + '</div>' +
+      "<h1>Come on in, the water's Super</h1></div>" + heroHtml() + '</div>' +
       '<div class="card"><div class="field">' +
       '<label class="eyebrow" for="pw">Password</label>' +
       '<input id="pw" type="password" autocomplete="off" placeholder="Password from Slack"></div>' +
