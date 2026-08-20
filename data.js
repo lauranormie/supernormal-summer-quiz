@@ -30,7 +30,7 @@ var QUESTIONS = [
   { q: "Picture round. Somewhere here a river hit a record low this summer. Which one is it?",
     img: "img/danube-2026.webp",
     credit: "Copernicus Sentinel-2, ESA, CC BY-SA 3.0 IGO",
-    a: ["The Loire, near Saumur", "The Rhine, near Boppard", "The Danube, north of Budapest", "The Po, near Cremona"], c: 2,
+    a: ["The Loire, France", "The Rhine, Germany", "The Danube, Hungary", "The Po, Italy"], c: 2,
     why: "The Danube north of Budapest on 4 August 2026, sandbanks showing and the countryside burnt brown. The Loire, Po, Rhine and Danube all hit record lows this summer." },
   { q: "Who said this in #general this summer? \u201cFor my birthday I get to put up Maya's new trampoline while she relaxes.\u201d",
     a: ["Laura", "Danelle", "Abby", "Katie"], c: 0,
