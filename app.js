@@ -39,6 +39,11 @@
       .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
   function isDraw(q) { return !!(q && q.type === "draw"); }
+  function shotHtml(q) {
+    if (!q || !q.img) return "";
+    return '<figure class="shot"><img src="' + q.img + '" alt="Photograph for the picture round">' +
+      (q.credit ? '<figcaption>' + esc(q.credit) + "</figcaption>" : "") + "</figure>";
+  }
   function secondsFor(qi) { return isDraw(QUESTIONS[qi]) ? DRAW_SECONDS : SECONDS; }
 
   function normalize(v) {
@@ -394,6 +399,7 @@
     return "<main>" + timer +
       '<div><div class="eyebrow">Question ' + (state.qIndex + 1) + " of " + QUESTIONS.length +
       '</div><h2 class="q-text" style="margin-top:10px">' + esc(q.q) + "</h2></div>" +
+      shotHtml(q) +
       '<div class="lanes">' + lanes + "</div>" +
       '<div class="row" style="justify-content:space-between">' +
       '<span class="muted">' + status + "</span>" +
@@ -514,6 +520,7 @@
       : mine ? '<div class="eyebrow" style="color:var(--wrong)">Not this time</div>'
       : "<div class=\"eyebrow\" style=\"color:var(--wrong)\">You didn't answer</div>";
     return "<main>" + verdict + '<h2 class="q-text">' + esc(q.q) + "</h2>" +
+      shotHtml(q) +
       '<div class="lanes">' + lanes + "</div>" +
       '<div class="note">' + q.why + "</div>" +
       '<div><div class="eyebrow" style="margin-bottom:10px">Standings</div>' + boardHtml(6) + "</div>" +
