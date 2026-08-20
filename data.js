@@ -43,7 +43,7 @@ var QUESTIONS = [
     why: "Sarah, on 20 July. Quite possibly the most popular message of the summer." },
   { q: "At June's Wacky Wednesday we all picked a favorite TV show. Which two of us both picked Severance?",
     a: ["Laura and Katie", "Anna and David", "Mel and Abby", "Sayan and Brett"], c: 1,
-    why: "Anna and David. Anna switched from Euphoria because the AI kept producing inappropriate outputs, and David was not even there, but sent in the tagline: the numbers are scary, we don't ask why." },
+    why: "Anna and David. The numbers are indeed scary." },
   { q: "On a German beach you can rent a Strandkorb. What is it?",
     a: ["A hooded wicker beach chair", "A picnic hamper", "A beach volleyball net", "A wind powered sand buggy"], c: 0,
     why: "A hooded wicker chair that keeps the wind off, first woven in Rostock in 1882 for a customer with rheumatism. The inventor never patented it, so they spread along the whole Baltic and North Sea coast." },
