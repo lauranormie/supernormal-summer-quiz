@@ -74,9 +74,9 @@ var QUESTIONS = [
   { q: "What is the Irish for summer?",
     a: ["Earrach", "Samhradh", "Fómhar", "Geimhreadh"], c: 1,
     why: "Samhradh. The other three are spring, autumn, and winter." },
-  { q: "Which Greek island is traditionally said to be the home of Odysseus?",
+  { q: "Nolan's The Odyssey was the film of the summer. Which Greek island is Odysseus trying to get home to?",
     a: ["Corfu", "Ithaca", "Crete", "Rhodes"], c: 1,
-    why: "Ithaca, where Penelope spent ten years waiting for him to find his way back." }
+    why: "Ithaca, where Penelope spent ten years waiting. The film opened on 17 July, passed a billion dollars, and was the first shot entirely on IMAX 70mm cameras." }
 ];
 
 var EMOJI = ["\u2600\ufe0f", "\ud83c\udf49", "\ud83c\udfd6\ufe0f", "\ud83c\udf66",
