@@ -41,7 +41,7 @@ var QUESTIONS = [
   { q: "Who said this in #general this summer? \u201cCancelling Team Sync today because Eng is crunching.\u201d",
     a: ["Anna", "Melina", "Sarah", "Danelle"], c: 2,
     why: "Sarah, on 20 July. Quite possibly the most popular message of the summer." },
-  { q: "Round the world round. On a German beach you can rent a Strandkorb. What is it?",
+  { q: "On a German beach you can rent a Strandkorb. What is it?",
     a: ["A hooded wicker beach chair", "A picnic hamper", "A beach volleyball net", "A wind powered sand buggy"], c: 0,
     why: "A hooded wicker chair that keeps the wind off, first woven in Rostock in 1882 for a customer with rheumatism. The inventor never patented it, so they spread along the whole Baltic and North Sea coast." },
   { q: "In the US, summer traditionally runs between which two holidays?",
